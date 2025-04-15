@@ -1,6 +1,6 @@
 package com.example.sneakershop.repositories;
 
-import com.example.sneakershop.entity.Order;
+import com.example.sneakershop.model.entity.Order;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

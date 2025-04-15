@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>SneakerShop - Каталог</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<header>
+    <div class="container">
+        <a href="/" class="logo">SneakerShop</a>
+        <nav>
+            <a href="/catalog">Каталог</a>
+            <a href="/cart">Корзина <span th:text="${cartCount}" class="cart-count"></span></a>
+            <a th:if="${#authorization.expression('isAuthenticated()')}" href="/profile">Профиль</a>
+            <a th:unless="${#authorization.expression('isAuthenticated()')}" href="/auth/login">Войти</a>
+        </nav>
+    </div>
+</header>
+
+<main class="container">
+    <div class="catalog-header">
+        <h1>Каталог кроссовок</h1>
+        <div class="filters">
+            <a th:href="@{/catalog}" class="filter-btn">Все</a>
+            <a th:each="category : ${T(com.example.sneakershop.enums.SneakerCategory).values()}"
+               th:href="@{/catalog(category=${category})}"
+               th:text="${category.displayName}"
+               class="filter-btn">
+            </a>
+        </div>
+    </div>
+
+    <div class="sneaker-grid">
+        <div th:each="sneaker : ${sneakers}" class="sneaker-card">
+            <img th:src="${sneaker.imageUrl}" alt="Кроссовки">
+            <h3 th:text="${sneaker.name}"></h3>
+            <p class="price" th:text="${sneaker.price + ' ₽'}"></p>
+            <a th:href="@{/sneakers/{id}(id=${sneaker.id})}" class="btn">Подробнее</a>
+            <form th:action="@{/cart/add}" method="post">
+                <input type="hidden" name="sneakerId" th:value="${sneaker.id}">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                <button type="submit" class="btn add-to-cart">В корзину</button>
+            </form>
+        </div>
+    </div>
+</main>
+
+<footer>
+    <div class="container">
+        <p>© 2023 SneakerShop. Все права защищены.</p>
+    </div>
+</footer>
+</body>
+</html>

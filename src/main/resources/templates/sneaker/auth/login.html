@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Вход в систему</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding-top: 60px;
+    }
+
+    .login-form {
+      max-width: 360px;
+      margin: auto;
+      padding: 30px;
+      background: #f9f9f9;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    label {
+      font-weight: bold;
+    }
+
+    input {
+      width: 100%;
+      padding: 8px;
+      box-sizing: border-box;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 10px;
+      background-color: #007bff;
+      border: none;
+      color: white;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .error {
+      color: red;
+      margin-bottom: 15px;
+      text-align: center;
+    }
+
+    .message {
+      color: green;
+      margin-bottom: 15px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+<div class="login-form">
+  <h2>Вход в систему</h2>
+
+  <div th:if="${error}" class="error" th:text="${error}"></div>
+  <div th:if="${message}" class="message" th:text="${message}"></div>
+
+  <form th:action="@{/auth/login}" method="post">
+    <div class="form-group">
+      <label for="username">Имя пользователя:</label>
+      <input type="text" id="username" name="username" required />
+    </div>
+
+    <div class="form-group">
+      <label for="password">Пароль:</label>
+      <input type="password" id="password" name="password" required />
+    </div>
+
+    <button type="submit" class="btn">Войти</button>
+  </form>
+
+  <p style="margin-top: 15px; text-align: center;">
+    Нет аккаунта? <a th:href="@{/register}">Зарегистрируйтесь</a>
+  </p>
+</div>
+</body>
+</html>

@@ -1,4 +1,4 @@
-package com.example.sneakershop.entity;
+package com.example.sneakershop.model.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
@@ -25,6 +26,9 @@ public class Order {
     @Column(name = "status", nullable = false, length = 20)
     private String status;  // Статус заказа, например, "новый", "в процессе", "завершен"
 
+    @Column(name = "order_date", nullable = false, updatable = false)
+    private LocalDateTime orderDate; // Дата создания заказа
+
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User user;  // Связь с пользователем
@@ -35,5 +39,6 @@ public class Order {
             joinColumns = @JoinColumn(name = "order_id"),
             inverseJoinColumns = @JoinColumn(name = "sneaker_id"))
     private List<Sneaker> sneakers;  // Список кроссовок в заказе
+
 
 }

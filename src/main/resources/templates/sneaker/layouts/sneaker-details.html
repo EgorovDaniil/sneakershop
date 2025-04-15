@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Подробнее о товаре</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      background-color: #f4f4f4;
+      color: #333;
+    }
+
+    .container {
+      margin-top: 50px;
+    }
+
+    .sneaker-details-header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .sneaker-details-header h1 {
+      font-size: 2.5rem;
+      color: #333;
+    }
+
+    .sneaker-image {
+      max-width: 100%;
+      border-radius: 8px;
+    }
+
+    .sneaker-info {
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      margin-top: 30px;
+    }
+
+    .sneaker-info h3 {
+      font-size: 2rem;
+      margin-bottom: 15px;
+    }
+
+    .sneaker-info p {
+      font-size: 1.1rem;
+      line-height: 1.6;
+      margin-bottom: 15px;
+    }
+
+    .sneaker-info button {
+      background-color: #ff5722;
+      color: #fff;
+      padding: 10px 20px;
+      font-size: 1rem;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .sneaker-info button:hover {
+      background-color: #e64a19;
+    }
+
+    .back-btn {
+      margin-top: 30px;
+      display: inline-block;
+      padding: 10px 20px;
+      background-color: #3f3f3f;
+      color: #fff;
+      text-decoration: none;
+      border-radius: 4px;
+      font-size: 1rem;
+    }
+
+    .back-btn:hover {
+      background-color: #5a5a5a;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <div class="sneaker-details-header">
+    <h1 th:text="${sneaker.name}">Название кроссовок</h1>
+  </div>
+
+  <div class="row">
+    <div class="col-md-6">
+      <!-- Изображение кроссовок -->
+      <img th:src="@{/img/{image}(image=${sneaker.imageUrl})}" class="card-img-top" alt="Sneaker image">
+    </div>
+    <div class="col-md-6">
+      <div class="sneaker-info">
+        <h3>Цена: <span th:text="${sneaker.price}">Цена</span> ₽</h3>
+        <p><strong>Бренд:</strong> <span th:text="${sneaker.brand}">Бренд</span></p>
+        <p><strong>Размеры:</strong> <span th:text="${sneaker.sizes}">Размеры</span></p>
+        <p><strong>Описание:</strong> <span th:text="${sneaker.description}">Описание</span></p>
+        <button class="btn btn-primary">Добавить в корзину</button>
+      </div>
+    </div>
+  </div>
+
+  <a href="/" class="back-btn">Назад</a>
+</div>
+
+</body>
+</html>

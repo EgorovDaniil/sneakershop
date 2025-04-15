@@ -1,31 +1,23 @@
 package com.example.sneakershop.dto;
 
-import com.example.sneakershop.entity.User;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
-@Getter
-@Setter
+@Data
 @NoArgsConstructor
+@AllArgsConstructor
+
 public class UserDTO {
     private Long id;
     private String username;
     private String email;
+    private String password;
+    private String confirmPassword;
+    private String role; // Добавляем поле role
 
-    // Конструктор, который принимает User и преобразует его в UserDTO
-    public UserDTO(Long id, String username, String email) {
-        this.id = id;
+
+    public UserDTO(String username, String password, String role) {
         this.username = username;
-        this.email = email;
+        this.password = password;
+        this.role = role;
     }
-
-    // Если ты хочешь, чтобы DTO принимал сущность User, можешь добавить этот конструктор
-    public UserDTO(User user) {
-        this.id = user.getId();
-        this.username = user.getUsername();
-        this.email = user.getEmail();
-    }
-
-
 }

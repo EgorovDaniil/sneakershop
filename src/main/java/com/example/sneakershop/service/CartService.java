@@ -1,85 +1,80 @@
 package com.example.sneakershop.service;
 
 import com.example.sneakershop.dto.CartDTO;
-import com.example.sneakershop.entity.Cart;
-import com.example.sneakershop.entity.Sneaker;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import com.example.sneakershop.dto.SneakerDTO;
+import com.example.sneakershop.model.entity.Cart;
+import com.example.sneakershop.model.entity.Sneaker;
+import com.example.sneakershop.model.entity.User;
+import com.example.sneakershop.exception.NotFoundException;
 import com.example.sneakershop.repositories.CartRepository;
 import com.example.sneakershop.repositories.SneakerRepository;
+import com.example.sneakershop.repositories.UserRepository;
+import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class CartService {
-    @Autowired
-    private CartRepository cartRepository;
-
-    @Autowired
-    private SneakerRepository sneakerRepository;
-
-    // Получить корзину пользователя по ID
-    public CartDTO getCartByUserId(Long userId) {
-        Cart cart = cartRepository.findByUserId(userId)
-                .orElseThrow(() -> new RuntimeException("Cart not found for user with id " + userId));
-        return new CartDTO(cart);
+    private final CartRepository cartRepository;
+    private final SneakerRepository sneakerRepository;
+    private final UserRepository userRepository;
+    // Получить корзину для пользователя (или создать новую)
+    public Cart getCartForUser(Long userId) {
+        return cartRepository.findByUserId(userId)
+                .orElseGet(() -> createNewCartForUser(userId));
     }
 
-    // Добавить товар в корзину
-    public CartDTO addSneakerToCart(Long userId, Long sneakerId) {
-        // Получаем корзину пользователя
-        Cart cart = cartRepository.findByUserId(userId)
-                .orElseThrow(() -> new RuntimeException("Cart not found for user with id " + userId));
-
-        // Получаем кроссовки по ID
+    // Создание новой корзины для пользователя
+    private Cart createNewCartForUser(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+        Cart newCart = new Cart();
+        newCart.setUser(user);
+        return cartRepository.save(newCart);
+    }
+    // Добавление кроссовка в корзину
+    public void addSneakerToCart(Long cartId, Long sneakerId) {
+        Cart cart = cartRepository.findById(cartId)
+                .orElseThrow(() -> new IllegalArgumentException("Cart not found"));
         Sneaker sneaker = sneakerRepository.findById(sneakerId)
-                .orElseThrow(() -> new RuntimeException("Sneaker not found with id " + sneakerId));
+                .orElseThrow(() -> new IllegalArgumentException("Sneaker not found"));
 
-        // Добавляем кроссовки в корзину
+        // Добавляем кроссовок в список
         cart.getSneakers().add(sneaker);
-        cart.setTotalPrice(cart.getTotalPrice() + sneaker.getPrice());
 
-        // Сохраняем обновленную корзину
-        Cart updatedCart = cartRepository.save(cart);
-        return new CartDTO(updatedCart);  // Возвращаем обновленную корзину как CartDTO
+        // Пересчитываем цену
+        double totalPrice = cart.getSneakers().stream()
+                .mapToDouble(Sneaker::getPrice)
+                .sum();
+        cart.setTotalPrice(totalPrice);
+
+        cartRepository.save(cart);
     }
 
-    // Удалить товар из корзины
-    public CartDTO removeSneakerFromCart(Long userId, Long sneakerId) {
-        // Получаем корзину пользователя
-        Cart cart = cartRepository.findByUserId(userId)
-                .orElseThrow(() -> new RuntimeException("Cart not found for user with id " + userId));
-
-        // Получаем кроссовки по ID
-        Sneaker sneaker = sneakerRepository.findById(sneakerId)
-                .orElseThrow(() -> new RuntimeException("Sneaker not found with id " + sneakerId));
-
-        // Удаляем кроссовки из корзины
-        cart.getSneakers().remove(sneaker);
-        cart.setTotalPrice(cart.getTotalPrice() - sneaker.getPrice());
-
-        // Сохраняем обновленную корзину
-        Cart updatedCart = cartRepository.save(cart);
-        return new CartDTO(updatedCart);  // Возвращаем обновленную корзину как CartDTO
+    private CartDTO convertToDTO(Cart cart) {
+        CartDTO dto = new CartDTO();
+        dto.setId(cart.getId());
+        dto.setUserId(cart.getUser().getId());
+        dto.setTotalPrice(BigDecimal.valueOf(cart.getTotalPrice()));
+        dto.setSneakers(cart.getSneakers().stream()
+                .map(this::convertSneakerToDTO)
+                .collect(Collectors.toList()));
+        return dto;
+    }
+    private SneakerDTO convertSneakerToDTO(Sneaker sneaker) {
+        SneakerDTO dto = new SneakerDTO();
+        dto.setId(sneaker.getId());
+        dto.setName(sneaker.getName());
+        dto.setPrice(sneaker.getPrice());
+        return dto;
     }
 
-    // Обновить корзину
-    public CartDTO updateCart(Long userId, CartDTO cartDTO) {
-        // Получаем корзину пользователя
-        Cart cart = cartRepository.findByUserId(userId)
-                .orElseThrow(() -> new RuntimeException("Cart not found for user with id " + userId));
 
-        // Обновляем данные корзины
-        cart.setTotalPrice(cartDTO.getTotalPrice());
-        cart.setSneakers(cartDTO.getSneakers() != null ? cartDTO.getSneakers().stream()
-                .map(sneakerDTO -> new Sneaker(sneakerDTO.getId(), sneakerDTO.getName(), sneakerDTO.getBrand(),
-                        sneakerDTO.getPrice(), sneakerDTO.getSize(), sneakerDTO.getImageUrl()))
-                .collect(Collectors.toList()) : cart.getSneakers());
 
-        // Сохраняем обновленную корзину
-        Cart updatedCart = cartRepository.save(cart);
-        return new CartDTO(updatedCart);  // Возвращаем обновленную корзину как CartDTO
-    }
 
 
 }

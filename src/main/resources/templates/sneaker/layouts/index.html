@@ -1,56 +1,68 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html xmlns:th="http://www.thymeleaf.org" lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Магазин кроссовок</title>
-  <link rel="stylesheet" href="/sneaker/css/style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${pageTitle}">SneakerShop</title>
+
+    <!-- Bootstrap CDN (для базового стиля) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+
+    <!-- Иконки -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <!-- Кастомные стили -->
+    <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-<header>
-  <div class="container">
-    <h1>Магазин кроссовок</h1>
-    <nav>
-      <ul>
-        <li><a href="#">Главная</a></li>
-        <li><a href="#catalog">Каталог</a></li>
-        <li><a href="#cart">Корзина</a></li>
-        <li><a href="#account">Аккаунт</a></li>
-        <li><a href="#about">О бренде</a></li>
-        <li><a href="/sneakers/contacts">Контакты</a></li>
-      </ul>
-    </nav>
-  </div>
+
+<!-- Header -->
+<header class="bg-dark text-white py-3 mb-4">
+    <div class="container d-flex justify-content-between align-items-center">
+        <a th:href="@{/}" class="navbar-brand text-white fs-4">SneakerShop</a>
+        <nav class="d-flex gap-4">
+            <a th:href="@{/sneaker/layouts/catalog}" class="text-white">Каталог</a>
+            <a th:href="@{/cart}" class="text-white">
+                Корзина <span th:text="${cartCount}" class="badge bg-success"></span>
+            </a>
+            <a th:if="${#authorization.expression('isAuthenticated()')}" th:href="@{/profile}" class="text-white">Профиль</a>
+            <a th:unless="${#authorization.expression('isAuthenticated()')}" th:href="@{/auth/login}" class="text-white">Войти</a>
+        </nav>
+    </div>
 </header>
 
-<main>
-  <section id="catalog">
-    <h2>Популярные товары</h2>
-    <div class="products">
-      <div class="product">
-        <img src="img/sneaker1.jpg" alt="Кроссовки 1">
-        <h3>Кроссовки Nike</h3>
-        <p>Цена: 9999 ₽</p>
-        <button>Купить</button>
-      </div>
-      <div class="product">
-        <img src="img/sneaker2.jpg" alt="Кроссовки 2">
-        <h3>Adidas Yeezy</h3>
-        <p>Цена: 14999 ₽</p>
-        <button>Купить</button>
-      </div>
-      <div class="product">
-        <img src="img/sneaker3.jpg" alt="Кроссовки 3">
-        <h3>Puma RS-X</h3>
-        <p>Цена: 7999 ₽</p>
-        <button>Купить</button>
-      </div>
-    </div>
-  </section>
+<!-- Hero Section -->
+<main class="container text-center mb-5">
+    <section class="py-5 bg-light rounded shadow-sm">
+        <h1 class="mb-3">Лучшие кроссовки для вас</h1>
+        <a th:href="@{/catalog}" class="btn btn-primary btn-lg">Смотреть коллекцию</a>
+    </section>
 </main>
 
-<footer>
-  <p>&copy; 2025 Магазин кроссовок. Все права защищены.</p>
+<!-- Featured Sneakers -->
+<section class="container mb-5">
+    <h2 class="text-center mb-4">Популярные модели</h2>
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-4">
+        <div class="col" th:each="sneaker : ${featuredSneakers}">
+            <div class="card h-100 shadow-sm">
+                <img th:src="@{${sneaker.imageUrl != null ? '/img/' + sneaker.imageUrl : '/img/default.png'}}"
+                     class="card-img-top"
+                     alt="Sneaker image">
+                <div class="card-body">
+                    <p class="card-text text-muted" th:text="${sneaker.price + ' ₽'}">Цена</p>
+                    <a th:href="@{'/sneaker/' + ${sneaker.id}}" class="btn btn-outline-primary">Подробнее</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Footer -->
+<footer class="bg-dark text-white text-center py-3">
+    <div class="container">
+        <p class="mb-0">© 2025 SneakerShop. Все права защищены.</p>
+    </div>
 </footer>
+
 </body>
 </html>

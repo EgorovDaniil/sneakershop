@@ -1,5 +1,6 @@
-package com.example.sneakershop.entity;
+package com.example.sneakershop.model.entity;
 
+import com.example.sneakershop.enums.SneakerCategory;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -27,11 +28,17 @@ public class Sneaker {
     @Column(name = "price", nullable = false)
     private Double price;
 
-    @Column(name = "size" , nullable = false , length = 10)
+    @Column(name = "size" , nullable = false , length = 250)
     private String size;
 
     @Column(name = "image_url", length = 255)
-    private String imageUrl;
+    private String imageUrl = "/images/";
+    @Column(name = "rating" , nullable = false)
+    private Double rating;
+
+    @Enumerated(EnumType.STRING)
+    private SneakerCategory category;
+
 
 
 

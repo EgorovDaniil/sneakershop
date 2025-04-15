@@ -1,67 +1,74 @@
 package com.example.sneakershop.service;
 
 import com.example.sneakershop.dto.SneakerDTO;
-import com.example.sneakershop.entity.Sneaker;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+
+import com.example.sneakershop.model.entity.Sneaker;
 import com.example.sneakershop.repositories.SneakerRepository;
+
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class SneakerService {
+    private final SneakerRepository sneakerRepository;
 
-    @Autowired
-    private SneakerRepository sneakerRepository;
-
-    // Получить все кроссовки
-    public List<SneakerDTO> getAllSneakers() {
-        List<Sneaker> sneakers = sneakerRepository.findAll();
-        return sneakers.stream()
-                .map(sneaker -> new SneakerDTO(sneaker)) // Преобразуем в SneakerDTO
-                .collect(Collectors.toList());
-    }
-
-    // Получить кроссовка по ID
-    public SneakerDTO getSneakerById(Long id) {
-        Sneaker sneaker = sneakerRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Sneaker not found with id " + id));
-        return new SneakerDTO(sneaker); // Преобразуем в SneakerDTO
-    }
-
-    // Добавить новый кроссовок
-    public SneakerDTO addSneaker(SneakerDTO sneakerDTO) {
+    // Преобразование DTO в сущность
+    private Sneaker convertToEntity(SneakerDTO sneakerDTO) {
         Sneaker sneaker = new Sneaker();
         sneaker.setName(sneakerDTO.getName());
         sneaker.setBrand(sneakerDTO.getBrand());
         sneaker.setPrice(sneakerDTO.getPrice());
-        sneaker.setSize(sneakerDTO.getSize());
+
+        // Преобразование списка размеров в строку
+        String sizesString = sneakerDTO.getSizes().stream()
+                .map(String::valueOf)
+                .collect(Collectors.joining(","));
+        sneaker.setSize(sizesString);  // Записываем строку в сущность
+
         sneaker.setImageUrl(sneakerDTO.getImageUrl());
-        Sneaker savedSneaker = sneakerRepository.save(sneaker);
-        return new SneakerDTO(savedSneaker); // Возвращаем DTO после сохранения
+        sneaker.setCategory(sneakerDTO.getCategory());
+
+        return sneaker;
     }
 
-    // Обновить существующего кроссовка
-    public SneakerDTO updateSneaker(Long id, SneakerDTO sneakerDTO) {
-        Sneaker sneaker = sneakerRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Sneaker not found with id " + id));
-
-        sneaker.setName(sneakerDTO.getName());
-        sneaker.setBrand(sneakerDTO.getBrand());
-        sneaker.setPrice(sneakerDTO.getPrice());
-        sneaker.setSize(sneakerDTO.getSize());
-        sneaker.setImageUrl(sneakerDTO.getImageUrl());
-
-        Sneaker updatedSneaker = sneakerRepository.save(sneaker);
-        return new SneakerDTO(updatedSneaker); // Возвращаем обновленное DTO
+    // Метод для сохранения кроссовок
+    public Sneaker saveSneaker(SneakerDTO sneakerDTO) {
+        Sneaker sneaker = convertToEntity(sneakerDTO);  // Преобразуем DTO в сущность
+        return sneakerRepository.save(sneaker);  // Сохраняем сущность в базу
     }
 
-    // Удалить кроссовок
-    public void deleteSneaker(Long id) {
-        Sneaker sneaker = sneakerRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Sneaker not found with id " + id));
 
-        sneakerRepository.delete(sneaker); // Удаляем кроссовок
+
+    public List<SneakerDTO> getAllSneakers() {
+        return sneakerRepository.findAll().stream()
+                .map(SneakerDTO::new)
+                .collect(Collectors.toList());
     }
+
+    public List<SneakerDTO> getSneakersByCategory(com.example.sneakershop.enums.SneakerCategory category) {
+        return sneakerRepository.findByCategory(category).stream()
+                .map(SneakerDTO::new)
+                .collect(Collectors.toList());
+    }
+
+    public SneakerDTO getSneakerById(Long id) {
+        Sneaker sneaker = sneakerRepository.findById(id).orElse(null);
+        if (sneaker == null) {
+            System.err.println("[ERROR] Sneaker not found, id: " + id);
+            return null; // или бросить исключение
+        }
+        return new SneakerDTO(sneaker);
+    }
+    // Метод для получения популярных товаров (DTO)
+    public List<SneakerDTO> getFeaturedSneakers() {
+        List<Sneaker> sneakers = sneakerRepository.findTop5ByOrderByRatingDesc(); // Получаем сущности
+        return sneakers.stream()
+                .map(SneakerDTO::new) // Преобразуем в DTO
+                .collect(Collectors.toList()); // Возвращаем список DTO
+    }
+
 }

@@ -1,80 +1,85 @@
 package com.example.sneakershop.service;
 
 import com.example.sneakershop.dto.UserDTO;
-import com.example.sneakershop.entity.User;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import com.example.sneakershop.model.entity.User;
 import com.example.sneakershop.repositories.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 
 @Service
-public class UserService {
-    @Autowired
-    private  UserRepository userRepository;
-    // Создать нового пользователя
-    public UserDTO createUser(UserDTO userDTO) {
-        // Проверка, чтобы избежать повторного имени или email
+public class UserService implements UserDetailsService {
+
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+
+    @
+            Autowired
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+    }
+
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        return (UserDetails) userRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("Пользователь не найден"));
+    }
+
+//    @Override
+//    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+//        User user = userRepository.findByUsername(username)
+//                .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
+//
+//        // Вариант 1: Если роль хранится как одна строка (например, "ROLE_USER")
+//        return org.springframework.security.core.userdetails.User.builder()
+//                .username(user.getUsername())
+//                .password(user.getPassword())
+//                .roles(user.getRole()) // Просто передаем строку с ролью
+//                .build();
+//    }
+
+    public boolean registerUser(UserDTO userDTO) {
         if (userRepository.existsByUsername(userDTO.getUsername())) {
-            throw new RuntimeException("Username is already taken");
+            throw new RuntimeException("Имя пользователя уже занято");
         }
 
-        if (userRepository.existsByEmail(userDTO.getEmail())) {
-            throw new RuntimeException("Email is already in use");
-        }
-
-        // Преобразуем DTO в Entity
         User user = new User();
         user.setUsername(userDTO.getUsername());
         user.setEmail(userDTO.getEmail());
+        user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
+        user.setRole("ROLE_USER");
+        user.setActive(true);
 
-        // Сохраняем пользователя в базу данных
-        User savedUser = userRepository.save(user);
-
-        // Возвращаем сохраненного пользователя в виде DTO
-        return new UserDTO(savedUser);
+        userRepository.save(user);
+        return true;
     }
 
-    // Получить пользователя по ID
-    public UserDTO getUserById(Long userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-
-        return new UserDTO(user);
-    }
-
-    // Получить пользователя по имени
-    public UserDTO getUserByUsername(String username) {
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-
-        return new UserDTO(user);
-    }
-
-    // Обновить информацию о пользователе
-    public UserDTO updateUser(Long userId, UserDTO userDTO) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-
-        // Обновляем информацию о пользователе
+    // Дополнительные методы для бизнес-логики, например:
+    public boolean saveUser(UserDTO userDTO) {
+        if (userRepository.findByUsername(userDTO.getUsername()).isPresent()) {
+            return false; // Пользователь с таким именем уже существует
+        }
+        User user = new User();
         user.setUsername(userDTO.getUsername());
-        user.setEmail(userDTO.getEmail());
-
-        // Сохраняем обновленного пользователя
-        User updatedUser = userRepository.save(user);
-
-        // Возвращаем обновленного пользователя в виде DTO
-        return new UserDTO(updatedUser);
-    }
-
-    // Удалить пользователя
-    public void deleteUser(Long userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-
-        userRepository.delete(user);
+        user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
+        user.setRole(userDTO.getRole() != null ? userDTO.getRole() : "ROLE_USER"); // Устанавливаем роль по умолчанию, если не указана
+        userRepository.save(user);
+        return true;
     }
 
 
 
+    public UserDTO findByUsername(String username) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("Пользователь не найден"));
 
+        return new UserDTO(user.getUsername(), user.getPassword(), user.getRole());
+    }
 }

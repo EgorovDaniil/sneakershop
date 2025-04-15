@@ -1,6 +1,7 @@
 package com.example.sneakershop.repositories;
 
-import com.example.sneakershop.entity.Sneaker;
+import com.example.sneakershop.model.entity.Sneaker;
+import com.example.sneakershop.enums.SneakerCategory;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
@@ -17,4 +18,9 @@ public interface SneakerRepository extends JpaRepository<Sneaker, Long> {
     List<Sneaker> findByPriceLessThanEqual(Double price);
 
     Optional<Sneaker> findAllById(Long id);
+
+    List<Sneaker> findByCategory(SneakerCategory category);
+    List<Sneaker> findTop5ByOrderByRatingDesc(); // Если нужно по рейтингу
+
+
 }
