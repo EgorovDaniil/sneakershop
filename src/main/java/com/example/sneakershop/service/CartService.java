@@ -32,11 +32,18 @@ public class CartService {
     private final UserRepository userRepository;
     private final CartItemRepository cartItemRepository;
 
-    // Получить корзину для пользователя (или создать новую)
+ //    Получить корзину для пользователя (или создать новую)
     public Cart getCartForUser(Long userId) {
-        return cartRepository.findByUserId(userId)
+        Cart cart = cartRepository.findByUserId(userId)
                 .orElseGet(() -> createNewCartForUser(userId));
+        System.out.println("Cart for user " + userId + ": items count = " +
+                (cart != null && cart.getItems() != null ? cart.getItems().size() : "null"));
+        return cart;
     }
+
+
+
+
 
     // Создание новой корзины для пользователя
     private Cart createNewCartForUser(Long userId) {
@@ -67,34 +74,36 @@ public class CartService {
 //    }
 
     public void addSneakerToCart(AddToCartDTO dto, String username) {
-        // 1. Получаем пользователя по имени, unwrap Optional
+        System.out.println("Adding sneaker to cart for user: " + username);
+
+        // 1. Получаем пользователя по имени
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
-
+        System.out.println("Found user with ID: " + user.getId());
         // 2. Получаем корзину пользователя или создаём новую
         Cart cart = cartRepository.findByUser(user)
                 .orElseGet(() -> {
                     Cart newCart = new Cart();
                     newCart.setUser(user);
-                    return newCart;
+                    return cartRepository.save(newCart);
                 });
-
+        System.out.println("Cart ID: " + cart.getId() + ", items count: " + cart.getItems().size());
         // 3. Находим кроссовок по ID
         Sneaker sneaker = sneakerRepository.findById(dto.getSneakerId())
                 .orElseThrow(() -> new EntityNotFoundException("Sneaker not found: " + dto.getSneakerId()));
-
+        System.out.println("Found sneaker: " + sneaker.getName());
         // 4. Создаём и конфигурируем CartItem
         CartItem item = new CartItem();
         item.setSneaker(sneaker);
         item.setSize(dto.getSize());
         item.setCart(cart);
-
-
+        item.setQuantity(1); // Устанавливаем начальное количество
         // 5. Добавляем в корзину
         cart.getItems().add(item);
 
-        // 6. Сохраняем корзину (CascadeType.ALL сохранит и CartItem)
+        // 6. Сохраняем корзину
         cartRepository.save(cart);
+        System.out.println("Saved cart with " + cart.getItems().size() + " items");
     }
 
     public void removeItemFromCart(Long cartItemId, Long userId) {
@@ -119,7 +128,7 @@ public class CartService {
         }
         double totalPrice = cart.getItems().stream()
                 .filter(item -> item.getSneaker() != null)
-                .mapToDouble(item -> item.getSneaker().getPrice())
+                .mapToDouble(item -> item.getSneaker().getPrice() * item.getQuantity())
                 .sum();
         cart.setTotalPrice(totalPrice);
     }
@@ -152,7 +161,21 @@ public class CartService {
     }
 
 
+    @Transactional
+    public void clearCart(Long userId) {
+        Cart cart = getCartForUser(userId);
+        if (cart == null) {
+            throw new IllegalArgumentException("Cart not found for user: " + userId);
+        }
+        cart.getItems().clear();
+        cartRepository.save(cart);
+    }
 
+    public boolean isCartEmpty(Long cartId) {
+        Cart cart = cartRepository.findById(cartId)
+                .orElseThrow(() -> new RuntimeException("Корзина не найдена"));
+        return cart.getItems().isEmpty();
+    }
 
 
 }
