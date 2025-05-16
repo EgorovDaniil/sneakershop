@@ -61,7 +61,7 @@ public class UserService implements UserDetailsService {
         return true;
     }
 
-    // Дополнительные методы для бизнес-логики, например:
+   
     public boolean saveUser(UserDTO userDTO) {
         if (userRepository.findByUsername(userDTO.getUsername()).isPresent()) {
             return false; // Пользователь с таким именем уже существует

@@ -48,6 +48,12 @@ public class OrderService {
                     return orderItem;
                 })
                 .collect(Collectors.toList());
+        // Рассчитываем общую стоимость
+        double totalPrice = orderItems.stream()
+                .mapToDouble(item -> item.getPrice() * item.getQuantity())
+                .sum();
+
+        order.setTotalPrice(totalPrice);
         order.setOrderItems(orderItems);
 
         // Сохраняем заказ

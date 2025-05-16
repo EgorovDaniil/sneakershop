@@ -15,6 +15,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
+import java.util.Map;
 
 @Controller
 @RequiredArgsConstructor
@@ -46,12 +47,40 @@ public class CartController {
       //  Long userId = cartService.getUserId(principal);
         Cart cart = cartService.getCartForUser(user.getId());
         CartDTO cartDTO = new CartDTO(cart);
+        // Проверка на пустую корзину
+        if (cart.getItems().isEmpty()) {
+            model.addAttribute("cartEmpty", true);
+            return "sneaker/layouts/cart";
+        }
         model.addAttribute("cart", cartDTO); // Вся корзина (для общей суммы)
         model.addAttribute("cartItems" , cart.getItems());
         model.addAttribute("totalPrice", cart.getTotalPrice());
 
 
         return "sneaker/layouts/cart";  // Страница с корзиной
+    }
+
+    @PostMapping("/cart/update/{id}")
+    @ResponseBody
+    public ResponseEntity<?> updateCartItemQuantity(
+            @PathVariable("id") Long cartItemId,
+            @RequestBody Map<String, Integer> payload,
+            @AuthenticationPrincipal User user) {
+        try {
+            cartService.updateCartItemQuantity(cartItemId, payload.get("quantity"), user.getId());
+            Cart updatedCart = cartService.getCartForUser(user.getId());
+            return ResponseEntity.ok(new CartDTO(updatedCart));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+
+    @GetMapping("/cart/total")
+    @ResponseBody
+    public ResponseEntity<Map<String, Double>> getCartTotal(@AuthenticationPrincipal User user) {
+        Cart cart = cartService.getCartForUser(user.getId());
+        return ResponseEntity.ok(Map.of("totalPrice", cart.getTotalPrice()));
     }
 
 

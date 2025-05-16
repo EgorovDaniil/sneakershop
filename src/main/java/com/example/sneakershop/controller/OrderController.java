@@ -1,5 +1,6 @@
 package com.example.sneakershop.controller;
 
+import com.example.sneakershop.dto.CartDTO;
 import com.example.sneakershop.dto.OrderDTO;
 import com.example.sneakershop.dto.OrderSneakerDTO;
 import com.example.sneakershop.model.entity.Cart;
@@ -53,6 +54,7 @@ public class OrderController {
 
             // Создаем заказ
             OrderDTO order = orderService.createOrderFromCart(cartId, user.getId());
+
 
             // Добавляем атрибуты для отображения
             model.addAttribute("orderSneakers", orderSneakers);

@@ -37,5 +37,9 @@ public class OrderDTO {
                         item.getQuantity()
                 ))
                 .collect(Collectors.toList());
+        this.totalPrice = this.sneakers.stream()
+                .mapToDouble(item -> item.getPrice() * item.getQuantity())
+                .sum();
+
     }
 }

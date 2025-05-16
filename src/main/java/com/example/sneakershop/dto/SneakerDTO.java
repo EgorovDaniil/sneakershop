@@ -1,7 +1,9 @@
 package com.example.sneakershop.dto;
 
+import com.example.sneakershop.mapper.SneakerMapperImpl;
 import com.example.sneakershop.model.entity.Sneaker;
 import com.example.sneakershop.enums.SneakerCategory;
+import com.example.sneakershop.util.SneakerMapperUtil;
 import jakarta.persistence.ElementCollection;
 import lombok.*;
 
@@ -10,17 +12,22 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+
 @Data
-public class SneakerDTO {
+@Getter
+@Setter
+public class SneakerDTO  {
 
     private Long id;
     private String name;
     private String brand;
     private Double price;
-    @ElementCollection
     private List<Integer> sizes; // Например: [38, 39, 40, 42]
+    private Integer size;        // выбранный размер
+
     private String imageUrl;
     private SneakerCategory category;
+
     public SneakerDTO() {
     }
 
@@ -29,23 +36,17 @@ public class SneakerDTO {
         this.name = sneaker.getName();
         this.brand = sneaker.getBrand();
         this.price = sneaker.getPrice();
-        this.sizes = parseSizes(sneaker.getSize());
+        this.sizes = SneakerMapperUtil.parseSizes(sneaker.getSize());
         this.imageUrl = sneaker.getImageUrl();
         this.category = sneaker.getCategory();
+
+        // Добавим логирование для отладки
+        System.out.println("Sneaker ID: " + id);
+        System.out.println("Sizes string from DB: " + sneaker.getSize());
+        System.out.println("Parsed sizes: " + sizes);
+
     }
-
-    // Вынесенная логика парсинга
-    private static List<Integer> parseSizes(String sizesString) {
-        if (sizesString == null || sizesString.isBlank()) {
-            return Collections.emptyList(); // Защита от null
-        }
-        return Arrays.stream(sizesString.split(","))
-                .map(String::trim)
-                .filter(s -> !s.isEmpty()) // Игнорируем пустые значения
-                .map(Integer::parseInt)
-                .collect(Collectors.toList());
-    }
-
-
 
 }
+
+

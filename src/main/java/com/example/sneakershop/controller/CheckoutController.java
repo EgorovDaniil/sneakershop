@@ -1,8 +1,5 @@
 package com.example.sneakershop.controller;
-import com.example.sneakershop.dto.CartSneakerDTO;
-import com.example.sneakershop.dto.OrderDTO;
-import com.example.sneakershop.dto.OrderSneakerDTO;
-import com.example.sneakershop.dto.SneakerDTO;
+import com.example.sneakershop.dto.*;
 import com.example.sneakershop.model.entity.Cart;
 import com.example.sneakershop.model.entity.Sneaker;
 import com.example.sneakershop.model.entity.User;
@@ -34,6 +31,7 @@ public class CheckoutController {
         System.out.println("Checkout requested for user: " + user.getUsername() + " (ID: " + user.getId() + ")");
 
         Cart cart = cartService.getCartForUser(user.getId());
+
         System.out.println("Retrieved cart: " + (cart != null ? "ID=" + cart.getId() : "null"));
 
         if (cart != null) {
@@ -42,9 +40,10 @@ public class CheckoutController {
                     System.out.println("Item: " + item.getSneaker().getName() + ", Size: " + item.getSize()));
         }
 
-        model.addAttribute("cart", cart);
-        model.addAttribute("totalPrice", cart.getTotalPrice()); // Добавляем общую стоимость
+        CartDTO cartDTO = new CartDTO(cart);
 
+        model.addAttribute("cart", cartDTO);
+        model.addAttribute("totalPrice", cartDTO.getTotalPrice()); // Добавляем общую стоимость
 
         List<OrderSneakerDTO> orderSneakers = cart.getItems().stream()
                 .map(item -> {

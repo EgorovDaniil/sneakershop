@@ -50,7 +50,8 @@
                      alt="Sneaker image">
                 <div class="card-body">
                     <p class="card-text text-muted" th:text="${sneaker.price + ' ₽'}">Цена</p>
-                    <a th:href="@{'/sneaker/' + ${sneaker.id}}" class="btn btn-outline-primary">Подробнее</a>
+                    <a th:href="@{/sneaker/{id}(id=${sneaker.id})}" class="btn btn-outline-primary">Подробнее</a>
+                    <span th:unless="${sneaker.id != null}" class="text-danger">ID не найден</span>
                 </div>
             </div>
         </div>

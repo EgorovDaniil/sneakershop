@@ -9,7 +9,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 @Controller
 
 public class ProfileController {
-    @GetMapping("/profile")
+    @GetMapping(
+            "/profile")
     public String userProfile(@AuthenticationPrincipal User user, Model model) {
         model.addAttribute("user", user);
         return "sneaker/layouts/account"; // убедись, что файл account.html существует

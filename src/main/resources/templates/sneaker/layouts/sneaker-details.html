@@ -1,110 +1,155 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="ru">
 <head>
   <meta charset="UTF-8">
-  <title>Подробнее о товаре</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title th:text="${sneaker.name + ' | SneakerShop'}">SneakerShop</title>
+
+  <!-- Bootstrap CDN -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+
+  <!-- Иконки -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+  <!-- Кастомные стили -->
   <link rel="stylesheet" href="/css/style.css">
+
   <style>
-    body {
-      font-family: 'Arial', sans-serif;
-      background-color: #f4f4f4;
-      color: #333;
-    }
-
-    .container {
-      margin-top: 50px;
-    }
-
-    .sneaker-details-header {
-      text-align: center;
-      margin-bottom: 30px;
-    }
-
-    .sneaker-details-header h1 {
-      font-size: 2.5rem;
-      color: #333;
+    .sneaker-detail-section {
+      background-color: #f8f9fa;
+      border-radius: 10px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }
 
     .sneaker-image {
-      max-width: 100%;
+      max-height: 500px;
+      object-fit: contain;
       border-radius: 8px;
     }
 
-    .sneaker-info {
-      background: #fff;
-      padding: 20px;
-      border-radius: 8px;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-      margin-top: 30px;
+    .price-tag {
+      font-size: 1.8rem;
+      font-weight: bold;
+      color: #dc3545;
     }
 
-    .sneaker-info h3 {
-      font-size: 2rem;
-      margin-bottom: 15px;
+    .size-badge {
+      font-size: 0.9rem;
+      margin-right: 5px;
+      margin-bottom: 5px;
     }
 
-    .sneaker-info p {
-      font-size: 1.1rem;
-      line-height: 1.6;
-      margin-bottom: 15px;
+    .back-link {
+      transition: all 0.3s ease;
     }
 
-    .sneaker-info button {
-      background-color: #ff5722;
-      color: #fff;
-      padding: 10px 20px;
-      font-size: 1rem;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
-    }
-
-    .sneaker-info button:hover {
-      background-color: #e64a19;
-    }
-
-    .back-btn {
-      margin-top: 30px;
-      display: inline-block;
-      padding: 10px 20px;
-      background-color: #3f3f3f;
-      color: #fff;
-      text-decoration: none;
-      border-radius: 4px;
-      font-size: 1rem;
-    }
-
-    .back-btn:hover {
-      background-color: #5a5a5a;
+    .back-link:hover {
+      transform: translateX(-5px);
     }
   </style>
 </head>
 <body>
 
-<div class="container">
-  <div class="sneaker-details-header">
-    <h1 th:text="${sneaker.name}">Название кроссовок</h1>
+<!-- Header -->
+<header class="bg-dark text-white py-3 mb-4">
+  <div class="container d-flex justify-content-between align-items-center">
+    <a th:href="@{/}" class="navbar-brand text-white fs-4">SneakerShop</a>
+    <nav class="d-flex gap-4">
+      <a th:href="@{/sneaker/layouts/catalog}" class="text-white">Каталог</a>
+      <a th:href="@{/cart}" class="text-white">
+<!--        Корзина <span th:text="${cart.sneakers.size()}" class="badge bg-success"></span>-->
+      </a>
+      <a th:if="${#authorization.expression('isAuthenticated()')}" th:href="@{/profile}" class="text-white">Профиль</a>
+      <a th:unless="${#authorization.expression('isAuthenticated()')}" th:href="@{/auth/login}" class="text-white">Войти</a>
+    </nav>
   </div>
+</header>
 
+<!-- Main Content -->
+<main class="container my-5">
   <div class="row">
-    <div class="col-md-6">
-      <!-- Изображение кроссовок -->
-      <img th:src="@{/img/{image}(image=${sneaker.imageUrl})}" class="card-img-top" alt="Sneaker image">
-    </div>
-    <div class="col-md-6">
-      <div class="sneaker-info">
-        <h3>Цена: <span th:text="${sneaker.price}">Цена</span> ₽</h3>
-        <p><strong>Бренд:</strong> <span th:text="${sneaker.brand}">Бренд</span></p>
-        <p><strong>Размеры:</strong> <span th:text="${sneaker.sizes}">Размеры</span></p>
-        <p><strong>Описание:</strong> <span th:text="${sneaker.description}">Описание</span></p>
-        <button class="btn btn-primary">Добавить в корзину</button>
-      </div>
+    <div class="col-md-12 mb-4">
+      <a th:href="@{/}" class="text-decoration-none back-link">
+        <i class="fas fa-arrow-left me-2"></i>Назад к каталогу
+      </a>
     </div>
   </div>
 
-  <a href="/" class="back-btn">Назад</a>
-</div>
+  <div class="row sneaker-detail-section p-4">
+    <!-- Изображение -->
+    <div class="col-md-6 mb-4 mb-md-0">
+      <img th:if="${sneaker.imageUrl != null}"
+           th:src="@{/img/{file}(file=${sneaker.imageUrl})}"
+           class="img-fluid sneaker-image"
+           alt="Sneaker image"/>
+    </div>
+
+    <!-- Информация -->
+    <div class="col-md-6">
+      <h1 class="mb-3" th:text="${sneaker.name}">Название кроссовок</h1>
+
+      <div class="d-flex align-items-center mb-4">
+        <span class="price-tag" th:text="${sneaker.price + ' ₽'}">0 ₽</span>
+        <span class="badge bg-primary ms-3" th:text="${sneaker.brand}">Бренд</span>
+      </div>
+
+      <div class="mb-4">
+        <h5 class="mb-3">Доступные размеры:</h5>
+        <form th:action="@{/cart/add/{sneakerId}(sneakerId=${sneaker.id})}" method="post" id="addToCartForm">
+          <input type="hidden" id="selectedSizeInput" name="size" value="0">
+          <input type="hidden" name="sneakerId" th:value="${sneaker.id}">
+          <div th:each="size : ${sneaker.sizes}">
+         <span class="badge size-badge"
+               style="font-size: 1rem; padding: 0.5rem 1rem; cursor: pointer"
+               th:text="${size}"
+               th:onclick="'selectSize(' + ${size} + ', event)'">
+         </span>
+          </div>
+
+          <div th:if="${#lists.isEmpty(sneaker.sizes)}">
+            Нет доступных размеров
+          </div>
+          <button type="submit" class="btn btn-primary mt-3">Добавить в корзину</button>
+        </form>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    function selectSize(size, event) {
+      document.getElementById('selectedSizeInput').value = size;
+
+      document.querySelectorAll('.size-badge').forEach(badge => {
+        badge.classList.remove('bg-success');
+        badge.classList.add('bg-secondary');
+      });
+
+      event.target.classList.remove('bg-secondary');
+      event.target.classList.add('bg-success');
+    }
+
+
+    // Отправка формы вручную
+    document.querySelector('form').onsubmit = function() {
+      const selectedSize = document.getElementById('selectedSizeInput').value;
+      if (selectedSize == '0') {
+        alert('Пожалуйста, выберите размер');
+        return false; // Прерывание отправки формы
+      }
+    }
+  </script>
+</main>
+
+<!-- Footer -->
+<footer class="bg-dark text-white text-center py-3 mt-5">
+  <div class="container">
+    <p class="mb-0">© 2025 SneakerShop. Все права защищены.</p>
+  </div>
+</footer>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
 </body>
 </html>

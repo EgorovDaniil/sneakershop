@@ -59,8 +59,10 @@ public class SecurityConfig   {
                                 "/error",
                                 "/css/**",
                                 "/catalog",
+                                "/cart/**",
                                 "/img/**",
-                                "/sneaker/**")
+                                "/sneaker/**",
+                                "/checkout/**")
                         .permitAll()
                         .requestMatchers("/cart/**", "/profile").authenticated()
                         .requestMatchers("/admin/**").hasRole("ADMIN")

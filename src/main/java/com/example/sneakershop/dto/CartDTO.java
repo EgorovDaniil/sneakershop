@@ -41,13 +41,31 @@ public class CartDTO {
                 .collect(Collectors.toList());
 
         this.totalPrice = getTotalPrice(cart);
+        System.out.println("Total price set in DTO: " + this.totalPrice);
+
     }
     private BigDecimal getTotalPrice(Cart cart) {
-        return cart.getItems().stream()
-                .filter(item -> item.getSneaker() != null)
-                .map(item -> BigDecimal.valueOf(item.getSneaker().getPrice() * item.getQuantity()))
+        if (cart == null || cart.getItems() == null || cart.getItems().isEmpty()) {
+            return BigDecimal.ZERO;
+        }
+
+        BigDecimal total = cart.getItems().stream()
+                .map(item -> {
+                    BigDecimal price = BigDecimal.valueOf(item.getSneaker().getPrice());
+                    int quantity = item.getQuantity();
+                    System.out.println("Calculating: " + item.getSneaker().getName() +
+                            ", price: " + price + ", quantity: " + quantity);
+                    return price.multiply(BigDecimal.valueOf(quantity));
+                })
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        System.out.println("Total cart price: " + total);
+        return total;
     }
+
+
+
+
 
 
 
