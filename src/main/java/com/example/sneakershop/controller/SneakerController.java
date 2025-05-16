@@ -29,16 +29,11 @@ public class SneakerController {
         return ResponseEntity.ok(sneakerService.getSneakersByCategory(sneakerCategory));
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<SneakerDTO> getSneakerById(@PathVariable Long id) {
-        return ResponseEntity.ok(sneakerService.getSneakerById(id));
-    }
 
     // Метод для создания нового кроссовка
     @PostMapping
     public ResponseEntity<SneakerDTO> createSneaker(@RequestBody SneakerDTO sneakerDTO) {
-        Sneaker savedSneaker = sneakerService.saveSneaker(sneakerDTO);  // Сохраняем кроссовок
-        SneakerDTO savedSneakerDTO = new SneakerDTO(savedSneaker);  // Преобразуем сущность в DTO
+        SneakerDTO savedSneakerDTO = sneakerService.saveSneaker(sneakerDTO);  // Сохраняем и сразу возвращаем DTO
         return ResponseEntity.ok(savedSneakerDTO);  // Возвращаем сохраненный кроссовок
     }
 }

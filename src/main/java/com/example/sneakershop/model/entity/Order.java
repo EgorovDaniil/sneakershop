@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -14,6 +15,7 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Table(name = "orders")
 public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -33,12 +35,22 @@ public class Order {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;  // Связь с пользователем
 
-    @ManyToMany
-    @JoinTable(
-            name = "order_sneaker",
-            joinColumns = @JoinColumn(name = "order_id"),
-            inverseJoinColumns = @JoinColumn(name = "sneaker_id"))
-    private List<Sneaker> sneakers;  // Список кроссовок в заказе
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<OrderItem> orderItems = new ArrayList<>();
+    // Helper method to add items
+    public void addOrderItem(OrderItem item) {
+        orderItems.add(item);
+        item.setOrder(this);
+    }
+
+//    @ManyToMany
+//    @JoinTable(
+//            name = "order_sneaker",
+//            joinColumns = @JoinColumn(name = "order_id"),
+//            inverseJoinColumns = @JoinColumn(name = "sneaker_id"))
+//    private List<Sneaker> sneakers;  // Список кроссовок в заказе
+
+
 
 
 }
